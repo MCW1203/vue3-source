@@ -10,7 +10,7 @@
     "moduleResolution": "node",
     "allowJs": false,
     "strict": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
