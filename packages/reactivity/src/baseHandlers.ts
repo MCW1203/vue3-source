@@ -1,5 +1,7 @@
 import { reactive, readonly } from './reactive'
 import { isObject,extend } from '@vue/shared'
+import { TrackOpTypes } from './operations'
+import { Track } from './effect'
 
 // 两个参数  1：是否只读  :2：是否浅层
 function createGetter(isReadonly = false, shallow = false) {
@@ -10,6 +12,8 @@ function createGetter(isReadonly = false, shallow = false) {
         // 如果是只读的，就不需要收集依赖
         if(!isReadonly){
             // 收集依赖
+            //收集effect
+            Track(target,TrackOpTypes.GET,key)
         } 
         if(shallow){
             return res
