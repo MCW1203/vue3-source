@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="../reactivity/dist/reactivity.global.js"></script>
+    <script>
+        let {reactive,effect}=VueReactivity
+        let state=reactive({
+            count:0,
+            name:'12121',
+            list:{
+                a:1,
+                b:2}
+        })
+        effect(()=>{
+            console.log('执行effect')
+        })
+        state.list.a=100
+        console.log(state.list)
+    </script>
+</body>
+</html>

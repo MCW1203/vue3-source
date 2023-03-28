@@ -1,6 +1,9 @@
-import {b} from '@vue/shared'
-
-console.log(b)
-let a=3
-let c=100
-export {a,c}
+import {reactive,shallowReactive,readonly,shallowReadonly} from './reactive'
+import {effect} from './effect'
+export {
+    reactive,
+    shallowReactive,
+    readonly,
+    shallowReadonly,
+    effect
+}
