@@ -1,16 +1,31 @@
 # vue3-source
 
+```javascript
+//个人信息
+@author:MCW1203
+@date  :2023-03-26
+@email :mmcw5491@gmail.com
+```
+
 ## 基本信息
 
 ```bash
 # 克隆项目
-git clone https://gitee.com/mcw1203/vue3-source.git
+git clone https://gitee.com/mcw1203/vue3-source.git 
+or
+git clone https://github.com/MCW1203/vue3-source.git
 
 # 进入项目目录
 cd vue3-source
 
 # 安装依赖
 yarn install
+
+# 打包
+npm run build
+
+# 测试包
+npm run dev
 
 ```
 
@@ -29,7 +44,10 @@ yarn install
 ├── node_modules
 ├── package-lock.json
 ├── package.json
-├──── packages // Vue源代码目录
+├── scripts    // rollup打包相关配置
+    ├── build  // 整体打包
+    ├── dev    // 测试包
+├── packages // Vue源代码目录
     ├── compiler-core // 顾名思义，核心中的核心，抽象语法树和渲染桥接实现
     ├── compiler-dom // Dom的实现
     ├── compiler-sfc // Vue单文件组件(.vue)的实现

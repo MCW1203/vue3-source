@@ -1,4 +1,7 @@
 {
+  "author":"MCW1203",
+  "date":"2023-03-26",
+  "email":"mmcw5491@gmail.com",
   "private": true,
   "workspaces": [
     "packages/*"
