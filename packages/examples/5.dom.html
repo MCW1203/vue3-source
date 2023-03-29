@@ -19,15 +19,16 @@
                 }
             },
             setup(props,context) {
-                 return{
-
-                 }
+                console.log('setup',props,context)
+                return{
+                    b:2
+                }
             },
-            render(){
-                console.log(666)
+            render(proxy){
+                console.log(666,proxy.name)
             }
         }
-        createApp(app,{name:'555'}).mount('#app')
+        createApp(app,{name:'555444'}).mount('#app')
     </script>
 </body>
 </html>

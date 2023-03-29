@@ -17,7 +17,7 @@ export const createVNode = (type, props, children = null) => {
         props,
         children,
         key: props && props.key,//diff算法会用到
-        component: null,
+        component: null,//实例对象
         el: null,   //使vnode和真实dom对应
         shapeFlag,  //标识 区分是组件还是vnode
     }
