@@ -37,3 +37,5 @@ export const isIntegerKey = (key) =>parseInt(key) === key
 
 // 判断两个值是否相等
 export const haseChange = (oldValue,newValue) => oldValue !== newValue
+
+export * from './shapeFlags'

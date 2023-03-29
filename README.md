@@ -54,7 +54,7 @@ npm run dev
     ├── compiler-ssr
     ├── global.d.ts
     ├── reactivity   //响应式
-    ├── runtime-core
+    ├── runtime-core //渲染
     ├── runtime-dom
     ├── runtime-test
     ├── server-renderer // 服务端渲染实现

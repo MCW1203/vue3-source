@@ -1,4 +1,5 @@
-let b=1
+import {createRenderer} from './render'
+
 export{
-    b
+    createRenderer
 }
