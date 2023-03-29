@@ -1,6 +1,7 @@
 import {reactive,shallowReactive,readonly,shallowReadonly} from './reactive'
 import {effect} from './effect'
-import {ref,toRef} from './ref'
+import {ref,toRef,toRefs} from './ref'
+import {computed} from './computed'
 
 export {
     reactive,
@@ -9,5 +10,7 @@ export {
     shallowReadonly,
     effect,
     ref,
-    toRef
+    toRef,
+    toRefs,
+    computed
 }

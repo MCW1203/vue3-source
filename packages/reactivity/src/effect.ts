@@ -6,6 +6,7 @@ import { TriggerOpTypes } from "./operations"
 
 // 1.定义effect
 export function effect(fn, options: any = {}) {
+    console.log(fn)
     // 1.创建effect
     const effect = createReactiveEffect(fn, options)
     // 2.判断是否立即执行
@@ -131,6 +132,10 @@ export function trigger(target, type, key?, newValue?, oldValue?) {
 
     // 执行
     effects.forEach((effect: any) => {
-        effect()
+        if(effect.options.sch){
+            effect.options.sch(effect)
+        }else{
+            effect()
+        }
     })
 }

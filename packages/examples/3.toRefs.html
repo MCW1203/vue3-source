@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script src="../reactivity/dist/reactivity.global.js"></script>
+    <script>
+        let { reactive, effect,ref,toRefs } = VueReactivity
+        let state = {
+            count: 0,
+            name: '12121',
+            list: [1,2,3]
+        }
+        let {count,name,list}=toRefs(state)
+        console.log(count,name,list)
+        effect(() => {
+            app.innerHTML=name.value
+            // state.list.a=111
+            // console.log('执行effect')
+            // console.log(state.count)
+        })
+        setTimeout(()=>{
+            name.value='666666666666'
+            console.log(count,name,list)
+        },2000)
+        
+        // console.log(state.list)
+    </script>
+</body>
+</html>
