@@ -17,6 +17,7 @@ export const createComponentInstance = (vnode) => {
         isMounted: false, //是否挂载
         data: {}, //组件的数据,兼容vue2
         render: '', //组件的render方法
+        el:null
     }
     instance.ctx = { _: instance }
     return instance

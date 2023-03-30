@@ -6,7 +6,7 @@ import { TriggerOpTypes } from "./operations"
 
 // 1.定义effect
 export function effect(fn, options: any = {}) {
-    console.log(fn)
+    // console.log(333333333)
     // 1.创建effect
     const effect = createReactiveEffect(fn, options)
     // 2.判断是否立即执行
@@ -41,6 +41,7 @@ function createReactiveEffect(fn, options) {
                 activeEffect = effectStacks[effectStacks.length - 1]
             }
         }
+        // console.log('执行effect')
     }
     // 区分effect
     effect.id = uid++
@@ -91,7 +92,7 @@ export function trigger(target, type, key?, newValue?, oldValue?) {
     // console.log(33333333,target,type,key,newValue,oldValue)
     // 触发依赖
     // console.log('targetMap-----》trigger',target, targetMap)
-    console.log(66666,key,newValue,targetMap)
+    // console.log(66666,key,newValue,targetMap)
 
     // 判断有没有目标对象
     const depsMap = targetMap.get(target)
@@ -129,7 +130,7 @@ export function trigger(target, type, key?, newValue?, oldValue?) {
                 break
         }
     }
-
+    // console.log('effects',effects)
     // 执行
     effects.forEach((effect: any) => {
         if(effect.options.sch){

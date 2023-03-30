@@ -12,7 +12,7 @@
     <div id="app">1212</div>
     <script src="../runtime-dom/dist/runtime-dom.global.js"></script>
     <script>
-        let { createApp, h } = VueRuntimeDom
+        let { createApp, h ,reactive } = VueRuntimeDom
         console.log(VueRuntimeDom)
         let app = {
             data() {
@@ -22,16 +22,34 @@
             },
             setup(props, context) {
                 // console.log('setup',props,context)
-                return {
-                    b: 2
+                let state=reactive({
+                    count:0,
+                    isFlag:true,
+                    name:'张三1'
+                })
+                setTimeout(()=>{
+                    state.isFlag=false
+                },2000)
+                const fn=()=>{
+                    state.name='李四111'
                 }
                 // return ()=>{
                 //     console.log('setup return function')
+                //     // return h('div', { style: { color: 'red' }, class: 'wwww', }, state.name)
                 // }
+                return {
+                    state,
+                    fn
+                }
             },
             render(proxy) {
+                return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, proxy.state.name)
                 // console.log(666,this,proxy)
-                return h('div', { style: { color: 'red' }, class: 'wwww', }, ['hello',4444])
+                // if(proxy.state.isFlag){
+                //     return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, proxy.state.name)
+                // }else{
+                //     return h('p', { style: { color: 'red' }, onClick:proxy.fn, }, '没有数据')
+                // }
             }
         }
         createApp(app, { name: '555444' }).mount('#app')

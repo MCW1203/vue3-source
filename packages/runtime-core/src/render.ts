@@ -42,13 +42,28 @@ export function createRenderer(rendererOptions) {
                 *  h('div',{},[h('div',{},'list')]) 
                 * */
                 //  1.h函数是创建一个虚拟dom 组件渲染的节点
-                let subTree = instance.render.call(proxy, proxy)
+                let subTree = instance.subTree = instance.render.call(proxy, proxy)
                 //  2.渲染到页面中
                 // console.log('subTree',subTree)
                 // 渲染子树 递归 创建元素
                 patch(null, subTree, container)
+                // 首次加载完成后，更改状态
+                instance.isMounted = true
+            } else {
+                // 组件更新
+                // console.log('组件更新')
+                // 比对，将旧的和新的进行比对
+                // 获取实例
+                let proxy = instance.proxy
+                // 1.获取到旧的虚拟dom
+                const prevTree = instance.subTree
+                // 2.获取到新的虚拟dom
+                const nextTree = instance.render.call(proxy, proxy)
+                // 3.比对
+                instance.subTree = nextTree //替换
+                patch(prevTree, nextTree, container)
             }
-        }, {})
+        })
     }
     // 处理组件
     //*******************   处理组件   ******************************* */
@@ -73,7 +88,7 @@ export function createRenderer(rendererOptions) {
     }
     // 处理文本
     //**************************    处理文本   ************************ */
-    const processText=(oldVnode, newVnode, container)=>{
+    const processText = (oldVnode, newVnode, container) => {
         if (oldVnode == null) {  //第一次创建
             // 创建文本元素并插入到对应位置
             hostInsert((newVnode.el = hostCreateText(newVnode.children)), container)
@@ -100,7 +115,7 @@ export function createRenderer(rendererOptions) {
         const { props, shapeFlag, type, children } = vnode
         // 获取真实的元素 dom节点
         // 创建元素
-        let el = hostCreateElement(type)
+        let el = vnode.el = hostCreateElement(type)
         // 添加属性
         for (let key in props) {
             hostPatchProp(el, key, null, props[key])
@@ -117,21 +132,69 @@ export function createRenderer(rendererOptions) {
             }
         }
         //创建元素-添加属性-处理子元素===> h('div',{style:{color:'red'}},'hello')==><div style='color:red'>hello</div>
-        console.log('mountElement', el)
+        // console.log('mountElement', el)
 
         // 放到对应的位置
         hostInsert(el, container)
     }
+    // 处理属性 属性（props）比对
+    const patchProps=(oldProps,newProps,el)=>{
+        //  旧：<div class style 属性></div>  新：<div class style></div>
+        // 循环遍历
+        if(oldProps!==newProps){
+            for(let key in newProps){
+                if(oldProps[key]!==newProps[key]){
+                    // 旧属性与新属性不相同 替换属性
+                    hostPatchProp(el,key,oldProps[key],newProps[key])
+                }
+            }
+            for(let key in oldProps){
+                if(!newProps[key]){
+                    // 旧的属性，新的没有，则删除属性
+                    hostPatchProp(el,key,null,newProps[key])
+                }
+            }
+        }
+        //  旧：<div class style></div>       新：<div class style 属性></div>
+        
+        
+    }
+    // 同一个元素比对
+    const patchElement=(oldVnode, newVnode, container)=>{
+        // <div class style 属性></div>  <div class style></div>
+        const el=(newVnode.el=oldVnode.el)
+        const oldProps=oldVnode.props||{}
+        const newProps=newVnode.props||{}
+        // 处理属性
+        patchProps(oldProps,newProps,el)
+    }
+    // 加载组件
     const processElement = (oldVnode, newVnode, container) => {
         if (oldVnode == null) {  //第一次创建
+            // console.log('重新加载')
             mountElement(newVnode, container)
         } else {
-
+            // 同一个元素
+            console.log('同一个元素')
+            patchElement(oldVnode, newVnode, container)
         }
+    }
+    // 判断是不是同一个元素 1.标签名 2.key
+    const isSomeVnode = (oldVnode, newVnode) => {
+        return oldVnode.type === newVnode.type && oldVnode.key === newVnode.key
+    }
+    // 卸载旧的节点
+    const unmont = (oldVnode) => {
+        hostRemove(oldVnode.el)
     }
     // oldVnode:旧节点  newVnode:新节点  container:容器
     const patch = (oldVnode, newVnode, container) => {
         // 针对不同的类型进行渲染
+        // 比对 1：判断是不是同一个元素
+        if (oldVnode && !isSomeVnode(oldVnode, newVnode)) {
+            unmont(oldVnode)  //删除元素
+            oldVnode = null   //重新加载
+        }
         let { shapeFlag, type } = newVnode
         switch (type) {
             case TEXT:

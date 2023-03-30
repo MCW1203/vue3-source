@@ -37,8 +37,9 @@ function createSetter(shallow = false) {
         const oldValue = target[key]
         // 判断是否是数组 
         let hasKey: boolean = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key)
-        // 获取新值
         const res = Reflect.set(target, key, value, receiver) //相当于 target[key]
+
+        // 获取新值
         if (!hasKey) {
             // 新增
             console.log('新增')
@@ -48,6 +49,7 @@ function createSetter(shallow = false) {
             console.log('修改',target,value,oldValue)
             // 修改时判断新值和老值是否相等
             if(haseChange(value,oldValue)){
+                console.log('haseChange(value,oldValue)')
                 trigger(target,TriggerOpTypes.SET,key,value,oldValue)
             }
             
