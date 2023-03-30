@@ -7,7 +7,7 @@
 */
 import { ShapeFlags, isArray, isObject, isString } from '@vue/shared'
 export const createVNode = (type, props, children = null) => {
-    console.log(type, props)
+    // console.log(type, props)
     // 区分是组件的vnode还是元素的vnode 
     // 使用位移运算符
     let shapeFlag = isString(type) ? ShapeFlags.ELEMENT : isObject(type) ? ShapeFlags.STATEFUL_COMPONENT : 0
@@ -37,4 +37,23 @@ function normalizeChildren(vnode, children) {
         type = ShapeFlags.TEXT_CHILDREN
     }
     vnode.shapeFlag = vnode.shapeFlag | type
+}
+
+// 判断是不是虚拟dom
+export function isVnode(vnode) {
+    return vnode._v_isVnode
+}
+
+
+
+// 元素的儿子变成vnode
+export const TEXT = Symbol('text')
+export function CVnode(child) {
+    // ['hello','world']  or  [h('div',{},'world')]
+    if (isObject(child)) {
+        // ['hello','world']
+        return child
+    }
+    // [h('div',{},'world')] 变成虚拟dom
+    return createVNode(TEXT, null, String(child))
 }

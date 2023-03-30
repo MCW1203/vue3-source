@@ -11,6 +11,8 @@ import { createRenderer } from '@vue/runtime-core'
 import { nodeOps } from './nodeOps'
 import { patchProp } from './patchProp'
 
+
+
 // vue3中 dom全部操作
 const rendererOptions = extend({ patchProp }, nodeOps)
 // createApp(app,{name:'555444'}).mount('#app') 接收传过来的参数 组件和相关属性
@@ -36,3 +38,4 @@ export const createApp = (tootComponent, rootProps) => {
 * 3.
 * 
 **/
+export * from '@vue/runtime-core'

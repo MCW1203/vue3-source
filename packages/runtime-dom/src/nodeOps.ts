@@ -31,7 +31,7 @@ export const nodeOps = {
     // 创建文本节点
     createText:text=>document.createTextNode(text),
     // 设置节点文本
-    setTextNode:(node,text)=>{
+    setText:(node,text)=>{
         node.nodeValue=text
     },
     // 设置属性
@@ -42,4 +42,10 @@ export const nodeOps = {
     removeElementProp:(el,key)=>{
         delete el[key]
     },
+    // 获取父节点
+    parentNode:node=>node.parentNode,
+    // 获取下一个兄弟节点
+    nextSibling:node=>node.nextSibling,
+    createComment:text=>document.createComment(text),
+
 }

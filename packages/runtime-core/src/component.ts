@@ -86,9 +86,9 @@ function finishComponentSetup(instance) {
             // 没有render但是有templete 进行模板编译
         }
     }
-    console.log(999999,instance.render)
+    // console.log(999999,instance.render)
     // 处理effect
-    setupRenderEffect(instance, instance.vnode.el)
+    // setupRenderEffect(instance, instance.vnode.el)
 }
 // 处理content
 function createContext(instance) {
@@ -103,9 +103,9 @@ function createContext(instance) {
 /** 
 * 创建一个effect方法 让render方法执行
 **/
-export const setupRenderEffect = (instance, container) => {
+// export const setupRenderEffect = (instance, container) => {
 
-}
+// }
 
 
 

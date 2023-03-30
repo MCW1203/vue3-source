@@ -1,37 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <div id="app">1212</div>
     <script src="../runtime-dom/dist/runtime-dom.global.js"></script>
     <script>
-        let {createApp}=VueRuntimeDom
+        let { createApp, h } = VueRuntimeDom
         console.log(VueRuntimeDom)
-        let app={
-            data(){
-                return{
-                    a:1
+        let app = {
+            data() {
+                return {
+                    a: 1
                 }
             },
-            setup(props,context) {
-                console.log('setup',props,context)
-                // return{
-                //     b:2
+            setup(props, context) {
+                // console.log('setup',props,context)
+                return {
+                    b: 2
+                }
+                // return ()=>{
+                //     console.log('setup return function')
                 // }
-                return ()=>{
-                    console.log('setup return function')
-                }
             },
-            render(proxy){
-                console.log(666,proxy.name)
+            render(proxy) {
+                // console.log(666,this,proxy)
+                return h('div', { style: { color: 'red' }, class: 'wwww', }, ['hello',4444])
             }
         }
-        createApp(app,{name:'555444'}).mount('#app')
+        createApp(app, { name: '555444' }).mount('#app')
     </script>
 </body>
+
 </html>

@@ -54,7 +54,7 @@ class ComputedRefImpl {
 
     // 获取值
     get value(){
-        // 判断是否需要重新计算
+        // 判断是否需要重新计算 根据标识和缓存判断
         if(this._dirty){
             // 获取用户的值
             this._value=this.effect()

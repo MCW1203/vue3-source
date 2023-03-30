@@ -1,5 +1,6 @@
-import {createRenderer} from './render'
+export {createRenderer} from './render'
+export { h } from './h'
 
-export{
-    createRenderer
-}
+// export{
+//     createRenderer
+// }
