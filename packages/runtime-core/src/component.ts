@@ -1,4 +1,4 @@
-import { ShapeFlags } from "@vue/shared"
+import { ShapeFlags, isFunction, isObject } from "@vue/shared"
 import { componentPublicInstance } from "./componentPublicInstance"
 
 /**
@@ -15,7 +15,8 @@ export const createComponentInstance = (vnode) => {
         ctx: {}, //组件的上下文，处理代理
         proxy: {}, //代理
         isMounted: false, //是否挂载
-        data:{} //组件的数据,兼容vue2
+        data: {}, //组件的数据,兼容vue2
+        render: '', //组件的render方法
     }
     instance.ctx = { _: instance }
     return instance
@@ -35,7 +36,7 @@ export const setupComponent = (instance) => {
     if (isStateFul) { //有状态的组件有setup方法
         setupStatefulComponent(instance)
     } else {
-        // 无状态的组件没有setup方法
+        // 无状态的组件 没有setup方法
     }
 
 }
@@ -47,13 +48,47 @@ function setupStatefulComponent(instance) {
     // 获取组件的类型拿到setup方法 参数(props,context)  返回值：对象，函数
     let Component = instance.vnode.type
     let { setup } = Component
-    // setup()
-    // 处理参数
-    let setupContext = createContext(instance)
-    setup(instance.props, setupContext)
+    // 看setup和render是否存在
+    if (setup) {
+        // setup()
+        // 处理参数
+        let setupContext = createContext(instance)
+        let setupResult = setup(instance.props, setupContext)
+        // setup返回值是对象{}或者函数（h()）
+        // 分别处理 如果是对象就是值，将对象的属性全部放到setupState上，如果是函数就将函数放到render上
+        hanslerSetupResult(instance, setupResult)
+    } else {
+        // 没有setup方法，执行render方法
+        finishComponentSetup(instance)
+    }
     // 处理render方法
     Component.render(instance.proxy)
 
+}
+// 处理setup返回值
+function hanslerSetupResult(instance, setupResult) {
+    if (isFunction(setupResult)) {
+        instance.render = setupResult  //setup返回值是函数setup{return ()=>{}},保存到render上
+    } else if (isObject(setupResult)) {
+        instance.setupState = setupResult //setup返回值是对象setup{return{}},保存到setupState上
+    }
+    // 走render方法
+    finishComponentSetup(instance)
+}
+// 处理render方法
+function finishComponentSetup(instance) {
+    // 拿到render方法，先判断组件中有没有render()方法
+    let Component = instance.vnode.type
+    if (!instance.render) {
+        if (Component.render) {
+            instance.render = Component.render
+        } else if (Component.template) {
+            // 没有render但是有templete 进行模板编译
+        }
+    }
+    console.log(999999,instance.render)
+    // 处理effect
+    setupRenderEffect(instance, instance.vnode.el)
 }
 // 处理content
 function createContext(instance) {
@@ -86,6 +121,7 @@ export const setupRenderEffect = (instance, container) => {
         return{
             b:2
         }
+        // return ()=>{}
     },
     render(proxy){
         console.log(666,proxy.name)

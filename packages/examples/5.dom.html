@@ -20,8 +20,11 @@
             },
             setup(props,context) {
                 console.log('setup',props,context)
-                return{
-                    b:2
+                // return{
+                //     b:2
+                // }
+                return ()=>{
+                    console.log('setup return function')
                 }
             },
             render(proxy){

@@ -13,7 +13,7 @@ import { patchProp } from './patchProp'
 
 // vue3中 dom全部操作
 const rendererOptions = extend({ patchProp }, nodeOps)
-
+// createApp(app,{name:'555444'}).mount('#app') 接收传过来的参数 组件和相关属性
 export const createApp = (tootComponent, rootProps) => {
     // 创建渲染器
     let app = createRenderer(rendererOptions).createApp(tootComponent, rootProps)
@@ -31,7 +31,7 @@ export const createApp = (tootComponent, rootProps) => {
 
 // 总结
 /** 
-* 1.创建createAPP方法 ====》runtime-dom 但是渲染组件是在不同的平台上
+* 1.创建createAPP方法 ====》runtime-dom 但是渲染组件是在不同的平台上 这里只考虑web端
 * 2.
 * 3.
 * 

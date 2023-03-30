@@ -9,7 +9,7 @@ import { ShapeFlags } from '@vue/shared'
 import {apiCreateApp} from './apiCreateApp'
 import { createComponentInstance, setupComponent, setupRenderEffect } from './component'
 
-
+// rendererOptions 操作节点和属性的方法
 export function createRenderer(rendererOptions) {
     const mountComponent=(InitialVnode,container)=>{
         // 组件的渲染流程 核心 
@@ -54,3 +54,10 @@ export function createRenderer(rendererOptions) {
     }
 }
 
+/**
+* setup 返回值处理
+* 1.返回函数setup{return ()=>{}}，将函数放到render上，执行render方法
+* 2.返回对象setup{return {}}，将函数放到render上
+*
+*
+**/
