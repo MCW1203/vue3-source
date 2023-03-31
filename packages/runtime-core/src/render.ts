@@ -100,19 +100,21 @@ export function createRenderer(rendererOptions) {
     //**************************    处理元素   ************************ */
     // 处理子元素children
     const mountChildren = (children, el) => {
+        console.log(103, children, el)
         // 递归渲染
-        for (let i = 0; i < children.length; i++) {
+        for (let i = 0; i < children?.length; i++) {
             let child = CVnode(children[i])
             // 创建文本 元素   
             patch(null, child, el)
         }
     }
     // 加载元素
-    const mountElement = (vnode, container) => {
+    const mountElement = (vnode, container,ancher=null) => {
         // 创建真实dom h('div',{},[h('div',{},'list')]) ==>dom操作===》放到页面
         // 递归渲染
         // 获取元素的属性
         const { props, shapeFlag, type, children } = vnode
+        console.log(117, children)
         // 获取真实的元素 dom节点
         // 创建元素
         let el = vnode.el = hostCreateElement(type)
@@ -125,9 +127,11 @@ export function createRenderer(rendererOptions) {
         if (children) {
             if (shapeFlag & ShapeFlags.TEXT_CHILDREN) { //文本
                 // 创建文本元素
+                console.log(130)
                 hostSetElementText(el, children)
             } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {  //children是数组
                 // 递归  数组   h('div',{style:{color:'red'}},['hello',222])
+                console.log(134, children, el)
                 mountChildren(children, el)
             }
         }
@@ -138,45 +142,136 @@ export function createRenderer(rendererOptions) {
         hostInsert(el, container)
     }
     // 处理属性 属性（props）比对
-    const patchProps=(oldProps,newProps,el)=>{
+    const patchProps = (oldProps, newProps, el) => {
         //  旧：<div class style 属性></div>  新：<div class style></div>
         // 循环遍历
-        if(oldProps!==newProps){
-            for(let key in newProps){
-                if(oldProps[key]!==newProps[key]){
+        if (oldProps !== newProps) {
+            for (let key in newProps) {
+                if (oldProps[key] !== newProps[key]) {
                     // 旧属性与新属性不相同 替换属性
-                    hostPatchProp(el,key,oldProps[key],newProps[key])
+                    hostPatchProp(el, key, oldProps[key], newProps[key])
                 }
             }
-            for(let key in oldProps){
-                if(!newProps[key]){
+            for (let key in oldProps) {
+                if (!newProps[key]) {
                     // 旧的属性，新的没有，则删除属性
-                    hostPatchProp(el,key,null,newProps[key])
+                    hostPatchProp(el, key, null, newProps[key])
                 }
             }
         }
         //  旧：<div class style></div>       新：<div class style 属性></div>
-        
-        
+
+
+    }
+    // 比对children
+    const patchChildren = (oldProps, newProps, el) => {
+        console.log(166, oldProps, newProps, el)
+        // 获取到两个元素的children的值
+        let c1 = oldProps.children
+        let c2 = newProps.children
+        // 儿子 4种情况
+        /**
+        * 1.children都是文本
+        * 2.新的有children，旧的没有
+        * 3.旧的有children 新的没有
+        * 4.都有children，但是children都是数组  
+        * */
+        // 
+        const oldShapeFlage = oldProps.shapeFlag  //旧的标识
+        const newShapeFlage = newProps.shapeFlag  //新的标识
+        if (newShapeFlage & ShapeFlags.TEXT_CHILDREN) {  //1.children都是文本 旧：<div class style>张三</div>  新：<div class style>李四</div>
+            hostSetElementText(el, c2) //替换文本节点
+            console.log(179)
+        } else {//不是文本 数组
+            console.log(181, c2)
+            if (oldShapeFlage & ShapeFlags.ARRAY_CHILDREN) { //旧的是数组
+                //都有children，而且children是数组
+                patchKeyedChildren(c1, c2, el)
+            } else { //旧的是文本
+                // 将旧的文本删除
+                hostSetElementText(el, '')
+                // 添加新的children（数组）
+                console.log(191, c2)
+                mountChildren(c2, el)
+            }
+        }
+
+    }
+    /************************************************************************************************ 
+                                        diff算法核心
+    *************************************************************************************************/
+    //都有children，而且children是数组
+    const patchKeyedChildren = (oldChildren, newChildren, el) => {
+        console.log(954321)
+        //vue2:双指针  vue3:先从头部比对，找出不同的跳出循环，再从尾部比对
+        let i = 0
+        let e1 = oldChildren.length
+        let e2 = newChildren.length
+        // sync from start :头部比对      
+        // 1.同一位置比对（两个元素不同 停止） 2.哪个数组没有 停止
+        // 旧的：<div><p></p></div>  新的：<div><p></p></div>
+        while (i <= el && i <= e2) {
+            const n1 = oldChildren[i]  //拿到节点中的数组 就是上面的<div></div>中的<p></p>
+            const n2 = newChildren[i]
+            if (isSomeVnode(n1, n2)) { //如果节点相同，递归
+                patch(n1, n2, el)
+            } else {  //如果节点不相同 停止while
+                break
+            }
+            i++ //比对的位置
+        }
+        // sync from end :尾部比对 
+        while (i <= el && i <= e2) {
+            const n1 = oldChildren[e1]  //拿到节点中的数组 从尾部比对 就是上面的<div></div>中的<p></p>
+            const n2 = newChildren[e2]
+            if (isSomeVnode(n1, n2)) { //如果节点相同，递归
+                patch(n1, n2, el)
+            } else {  //如果节点不相同 停止while
+                break
+            }
+            e1--
+            e2--
+        }
+        console.log(232, i, e1, e2)
+        // 更新数据 根据i e1 e2 
+        //1.旧的数据少，新的数据多 2.旧的数据多，新的数据多
+        if (i > e1) {   //旧的数据少，新的数据多
+            // 添加数据 ：头部添加或者尾部添加
+            const nextProps = e2 + 1  //插入的位置
+            // 如果是前追加 nextProps < e2
+            // 要追加元素的标记点
+            const ancher = nextProps < newChildren.length ? newChildren[nextProps].el : null
+            while (i < e2) {
+                patch(null, newChildren[i++], el, ancher)
+            }
+
+        }else if(i<e1){  //旧的数据多，新的数据少
+            // 删除多余的数据
+            unmont(oldChildren[i++])
+        }
+
     }
     // 同一个元素比对
-    const patchElement=(oldVnode, newVnode, container)=>{
+    const patchElement = (oldVnode, newVnode, container,ancher=null) => {
         // <div class style 属性></div>  <div class style></div>
-        const el=(newVnode.el=oldVnode.el)
-        const oldProps=oldVnode.props||{}
-        const newProps=newVnode.props||{}
-        // 处理属性
-        patchProps(oldProps,newProps,el)
+        const el = (newVnode.el = oldVnode.el)
+        const oldProps = oldVnode.props || {}
+        const newProps = newVnode.props || {}
+        // 比对属性
+        console.log(77777)
+        patchProps(oldProps, newProps, el)
+        // 比对children
+        patchChildren(oldProps, newProps, el)
     }
     // 加载组件
-    const processElement = (oldVnode, newVnode, container) => {
+    const processElement = (oldVnode, newVnode, container,ancher=null) => {
         if (oldVnode == null) {  //第一次创建
-            // console.log('重新加载')
-            mountElement(newVnode, container)
+            console.log('重新加载')
+            mountElement(newVnode, container,ancher)
         } else {
             // 同一个元素
             console.log('同一个元素')
-            patchElement(oldVnode, newVnode, container)
+            patchElement(oldVnode, newVnode, container,ancher)
         }
     }
     // 判断是不是同一个元素 1.标签名 2.key
@@ -188,7 +283,7 @@ export function createRenderer(rendererOptions) {
         hostRemove(oldVnode.el)
     }
     // oldVnode:旧节点  newVnode:新节点  container:容器
-    const patch = (oldVnode, newVnode, container) => {
+    const patch = (oldVnode, newVnode, container, ancher = null) => {
         // 针对不同的类型进行渲染
         // 比对 1：判断是不是同一个元素
         if (oldVnode && !isSomeVnode(oldVnode, newVnode)) {
@@ -205,7 +300,7 @@ export function createRenderer(rendererOptions) {
                 if (shapeFlag & ShapeFlags.ELEMENT) { //元素
                     console.log('元素', oldVnode, newVnode, container)
                     // 加载组件
-                    processElement(oldVnode, newVnode, container)
+                    processElement(oldVnode, newVnode, container,ancher)
                 } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) { //组件
                     processComponent(oldVnode, newVnode, container)
                 }
@@ -232,4 +327,35 @@ export function createRenderer(rendererOptions) {
 * 2.返回对象setup{return {}}，将函数放到render上
 *
 *
+**/
+
+/** 
+* Vue3中的虚拟DOM算法是通过Diff算法实现的。Vue3中的Diff算法流程大致如下：
+* 
+* 一.将模板编译成渲染函数，并将渲染函数的返回值作为旧的虚拟DOM树，保存在组件实例中。
+* 
+* 二.当组件状态发生改变时，调用渲染函数生成新的虚拟DOM树。
+* 
+* 三.将新旧虚拟DOM树进行比较，找出差异。
+* 
+* 四.根据差异类型执行相应的DOM操作。
+* 
+* 具体来说，Vue3的Diff算法主要包括以下步骤：
+* 
+* 1.标记每个节点的唯一标识符，以便快速找到需要更新的节点。
+* 
+* 2.从旧的虚拟DOM树的根节点开始遍历，依次比较每个节点和其对应的新虚拟DOM树节点。
+* 
+* 3.如果节点类型不同，直接替换节点。
+* 
+* 4.如果节点类型相同，比较节点属性，如果有差异，更新节点属性。
+* 
+* 5.对比子节点列表，移除旧节点多余的子节点，插入新节点缺少的子节点，更新相同位置的子节点。
+* 
+* 6.在比较过程中，使用“双端队列”算法进行优化，可以减少比较次数，提高性能。
+* 
+* 7.最后，执行副作用函数，更新DOM。
+* 
+* 总之，Vue3的Diff算法主要是将旧的虚拟DOM树和新的虚拟DOM树进行比较，找出差异，并执行相应的DOM操作。
+  同时，Vue3还针对Diff算法进行了一些优化，使其更加高效和可靠。
 **/

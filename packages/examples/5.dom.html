@@ -24,11 +24,11 @@
                 // console.log('setup',props,context)
                 let state=reactive({
                     count:0,
-                    isFlag:true,
+                    isFlag:false,
                     name:'张三1'
                 })
                 setTimeout(()=>{
-                    state.isFlag=false
+                    state.isFlag=true
                 },2000)
                 const fn=()=>{
                     state.name='李四111'
@@ -43,13 +43,28 @@
                 }
             },
             render(proxy) {
-                return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, proxy.state.name)
+                // return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, proxy.state.name)
                 // console.log(666,this,proxy)
-                // if(proxy.state.isFlag){
-                //     return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, proxy.state.name)
-                // }else{
-                //     return h('p', { style: { color: 'red' }, onClick:proxy.fn, }, '没有数据')
-                // }
+                if(proxy.state.isFlag){
+                    return h('div', { style: { color: 'red' }, onClick:proxy.fn, }, 
+                    [
+                    h('div',{key:'A'},'A'),
+                    h('div',{key:'B'},'B'),
+                    h('div',{key:'C'},'C'),
+                    h('div',{key:'D'},'D'),
+                    ]
+                    )
+                }else{
+                    console.log('proxy.state.name',proxy.state.name)
+                    return h('p', { style: { color: 'blue' }, onClick:proxy.fn, }, 
+                    [
+                    h('div',{key:'A'},'A'),
+                    h('div',{key:'B'},'B'),
+                    h('div',{key:'C'},'C'),
+                    // h('div',{key:'D'},'D'),
+                    ]
+                    )
+                }
             }
         }
         createApp(app, { name: '555444' }).mount('#app')
