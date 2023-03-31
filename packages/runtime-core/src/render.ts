@@ -109,7 +109,7 @@ export function createRenderer(rendererOptions) {
         }
     }
     // 加载元素
-    const mountElement = (vnode, container,ancher=null) => {
+    const mountElement = (vnode, container, ancher = null) => {
         // 创建真实dom h('div',{},[h('div',{},'list')]) ==>dom操作===》放到页面
         // 递归渲染
         // 获取元素的属性
@@ -245,14 +245,60 @@ export function createRenderer(rendererOptions) {
                 patch(null, newChildren[i++], el, ancher)
             }
 
-        }else if(i<e1){  //旧的数据多，新的数据少
+        } else if (i < e1) {  //旧的数据多，新的数据少
             // 删除多余的数据
             unmont(oldChildren[i++])
+        } else {
+            // 乱序的情况
+            /* 解决思路
+              1.以新的乱序的个数创建一个映射表
+              2.再用旧的乱序的数据去新的表中找，如果有就复用，没有就删除
+            */
+            let s1 = i
+            let s2 = i
+            // 解决乱序比对的问题  1.新添加的数据在旧的中没有的，没有创建出来 2.位置不对
+            const toBePatched = e2 - s2 + 1  //乱序的个数
+            // 创建数组
+            const newIndexToPatchMap = new Array(toBePatched).fill(0)
+            // 创建表
+            let keyIndexMap = new Map()
+            // 用新的乱序的数据创建表
+            for (let i = s2; i < e2; i++) {
+                const childVnode = newChildren[i] //新的乱序的虚拟dom
+                keyIndexMap.set(childVnode.key, i)
+            }
+            // 用老的乱序的数据创建表
+            for (let i = s1; i < e1; i++) {
+                const oldChildVnode = oldChildren[i] //旧的乱序的虚拟dom
+                let newIndex = keyIndexMap.get(oldChildVnode.key)
+                if (newIndex == undefined) { //旧的数据在新的表中没有 删除
+                    unmont(oldChildVnode)
+                } else {  //旧的数据在新的表中有
+                    // 问题 1.新添加的数据在旧的中没有的，没有创建出来 2.位置不对
+                    // 旧的和新的关系 索引的关系
+                    newIndexToPatchMap[newIndex - s2] = i + 1  //新的数据在老的数据中索引的位置
+                    // 比对
+                    patch(oldChildVnode, newChildren[newIndex], el)
+                }
+            }
+            // 移动节点 添加新增的元素   方法：倒叙循环
+            for (let i = toBePatched - 1; i >= 0; i--) {
+                let currentIndex = i + s2  //新增h元素的索引
+                let child=newChildren[currentIndex]
+                // 添加位置
+                let ancher = currentIndex + 1 < newChildren.length ? newChildren[currentIndex+1].el : null
+                if(newIndexToPatchMap[i]===0){  // 第一次插入h()后
+                    patch(null,child,el,ancher)
+                }else{
+                    // 这个操作将需要的全部插入进去
+                    hostInsert(child.el,el,ancher)
+                }
+            }
         }
 
     }
     // 同一个元素比对
-    const patchElement = (oldVnode, newVnode, container,ancher=null) => {
+    const patchElement = (oldVnode, newVnode, container, ancher = null) => {
         // <div class style 属性></div>  <div class style></div>
         const el = (newVnode.el = oldVnode.el)
         const oldProps = oldVnode.props || {}
@@ -264,14 +310,14 @@ export function createRenderer(rendererOptions) {
         patchChildren(oldProps, newProps, el)
     }
     // 加载组件
-    const processElement = (oldVnode, newVnode, container,ancher=null) => {
+    const processElement = (oldVnode, newVnode, container, ancher = null) => {
         if (oldVnode == null) {  //第一次创建
             console.log('重新加载')
-            mountElement(newVnode, container,ancher)
+            mountElement(newVnode, container, ancher)
         } else {
             // 同一个元素
             console.log('同一个元素')
-            patchElement(oldVnode, newVnode, container,ancher)
+            patchElement(oldVnode, newVnode, container, ancher)
         }
     }
     // 判断是不是同一个元素 1.标签名 2.key
@@ -300,7 +346,7 @@ export function createRenderer(rendererOptions) {
                 if (shapeFlag & ShapeFlags.ELEMENT) { //元素
                     console.log('元素', oldVnode, newVnode, container)
                     // 加载组件
-                    processElement(oldVnode, newVnode, container,ancher)
+                    processElement(oldVnode, newVnode, container, ancher)
                 } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) { //组件
                     processComponent(oldVnode, newVnode, container)
                 }
