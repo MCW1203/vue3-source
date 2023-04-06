@@ -1,6 +1,14 @@
 import { ShapeFlags, isFunction, isObject } from "@vue/shared"
 import { componentPublicInstance } from "./componentPublicInstance"
 
+// 获取当前实例
+export const getCurrentInstance = () => {
+    return currentInstance
+}
+// 设置当前实例
+export const setCurrentInstance = (target) => {
+    currentInstance=target
+}
 /**
 * 创建组件实例对象
 **/
@@ -42,6 +50,7 @@ export const setupComponent = (instance) => {
 
 }
 // 处理有状态的组件setup()
+export let currentInstance
 function setupStatefulComponent(instance) {
     // 代理
     instance.proxy = new Proxy(instance.ctx, componentPublicInstance as any)
@@ -53,8 +62,11 @@ function setupStatefulComponent(instance) {
     if (setup) {
         // setup()
         // 处理参数
+        // setup之前，创建全局的currentInstance
+        currentInstance=instance
         let setupContext = createContext(instance)
         let setupResult = setup(instance.props, setupContext)
+        currentInstance=null
         // setup返回值是对象{}或者函数（h()）
         // 分别处理 如果是对象就是值，将对象的属性全部放到setupState上，如果是函数就将函数放到render上
         hanslerSetupResult(instance, setupResult)

@@ -10,6 +10,7 @@ import { apiCreateApp } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
 import { effect } from '@vue/reactivity'
 import { CVnode, TEXT } from './vnode'
+import { invokeArrayFns } from './apilifecycle'
 
 // rendererOptions 操作节点和属性的方法
 export function createRenderer(rendererOptions) {
@@ -24,13 +25,23 @@ export function createRenderer(rendererOptions) {
         setText: hostSetText,// 设置文本
         setElementText: hostSetElementText,// 设置元素文本
     } = rendererOptions
-    // 创建一个effect方法 让render方法执行
+    // 创建一个effect方法 让render方法执行及生命周期处理
+    /***************************************************************************
+                        render方法执行及生命周期处理
+    ******************************************************************************/
     function setupRenderEffect(instance, container) {
         // 创建一个effect 在effect中调用render方法 ，这样render中获取数据会收集effect
         // 当属性发生变化时，会重新执行effect方法，重新执行render方法
         effect(function componentEffect() {
             // 判断是否是第一次记载组件
             if (!instance.isMounted) {
+                // 组件渲染
+                // 渲染之前
+                let {bm,m} =instance //将生命周期放到实例上
+                if(bm){
+                    // 执行生命周期方法  onBeforeMount
+                    invokeArrayFns(bm)
+                }
                 // 获取到render返回值
                 // 组件实例 被代理过的
                 let proxy = instance.proxy
@@ -47,10 +58,20 @@ export function createRenderer(rendererOptions) {
                 // console.log('subTree',subTree)
                 // 渲染子树 递归 创建元素
                 patch(null, subTree, container)
+                // 渲染完成
+                if(m){
+                    // 执行生命周期方法 onMounted
+                    invokeArrayFns(m)
+                }
                 // 首次加载完成后，更改状态
                 instance.isMounted = true
             } else {
                 // 组件更新
+                let {u,bu}=instance
+                if(bu){
+                    // 执行生命周期方法 更新之前 onBeforeUpdate 
+                    invokeArrayFns(bu)
+                }
                 // console.log('组件更新')
                 // 比对，将旧的和新的进行比对
                 // 获取实例
@@ -62,6 +83,10 @@ export function createRenderer(rendererOptions) {
                 // 3.比对
                 instance.subTree = nextTree //替换
                 patch(prevTree, nextTree, container)
+                if(u){
+                    // 执行生命周期方法 更新之后 onUpdated
+                    invokeArrayFns(u)
+                }
             }
         })
     }
